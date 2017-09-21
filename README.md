@@ -1,5 +1,5 @@
 # changlin-mc
-redux + redux-saga
+redux + redux-saga +react + ...
 
 ### v1.x 是含react 版本， 依赖包含：
         "babel-runtime": "^6.23.0",
