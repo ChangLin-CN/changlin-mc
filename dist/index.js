@@ -59,9 +59,9 @@ var _reduxSaga = require('redux-saga');
 
 var _reduxSaga2 = _interopRequireDefault(_reduxSaga);
 
-var _effects3 = require('redux-saga/effects');
+var _effects4 = require('redux-saga/effects');
 
-var sagaEffects = _interopRequireWildcard(_effects3);
+var sagaEffects = _interopRequireWildcard(_effects4);
 
 var _changlinUtil = require('changlin-util');
 
@@ -371,18 +371,13 @@ var createApp = function createApp() {
                             return fn(action, (0, _extends3.default)({}, sagaEffects, createSagaEffectsFnWrapper(namespace)));
 
                         case 5:
-                            _context2.next = 10;
+                            _context2.next = 13;
                             break;
 
                         case 7:
                             _context2.prev = 7;
                             _context2.t0 = _context2['catch'](0);
-
-                            handleError(_context2.t0);
-
-                        case 10:
-                            _context2.prev = 10;
-                            _context2.next = 13;
+                            _context2.next = 11;
                             return sagaEffects.put({
                                 type: 'loading',
                                 payload: {
@@ -390,15 +385,25 @@ var createApp = function createApp() {
                                 }
                             });
 
-                        case 13:
-                            return _context2.finish(10);
+                        case 11:
+                            handleError(_context2.t0);
+                            return _context2.abrupt('return');
 
-                        case 14:
+                        case 13:
+                            _context2.next = 15;
+                            return sagaEffects.put({
+                                type: 'loading',
+                                payload: {
+                                    effects: (0, _defineProperty3.default)({}, namespace + separator + key, false)
+                                }
+                            });
+
+                        case 15:
                         case 'end':
                             return _context2.stop();
                     }
                 }
-            }, wrapper, this, [[0, 7, 10, 14]]);
+            }, wrapper, this, [[0, 7]]);
         });
 
         switch (type) {

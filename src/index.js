@@ -198,15 +198,21 @@ export let createApp = function (config = {}) {
                 });
                 yield fn(action, {...sagaEffects, ...createSagaEffectsFnWrapper(namespace)})
             } catch (e) {
-                handleError(e)
-            } finally {
                 yield   sagaEffects.put({
                     type: 'loading',
                     payload: {
                         effects: {[namespace + separator + key]: false}
                     }
                 })
+                handleError(e)
+                return
             }
+            yield   sagaEffects.put({
+                type: 'loading',
+                payload: {
+                    effects: {[namespace + separator + key]: false}
+                }
+            })
         };
         
         switch (type) {
