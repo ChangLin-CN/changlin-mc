@@ -189,6 +189,7 @@ export let createApp = function (config = {}) {
         }
         
         let wrapper = function* (action) {
+            let err;
             try {
                 yield sagaEffects.put({
                     type: 'loading',
@@ -198,21 +199,17 @@ export let createApp = function (config = {}) {
                 });
                 yield fn(action, {...sagaEffects, ...createSagaEffectsFnWrapper(namespace)})
             } catch (e) {
-                yield   sagaEffects.put({
-                    type: 'loading',
-                    payload: {
-                        effects: {[namespace + separator + key]: false}
-                    }
-                })
-                handleError(e)
-                return
+                err=e;
             }
             yield   sagaEffects.put({
                 type: 'loading',
                 payload: {
                     effects: {[namespace + separator + key]: false}
                 }
-            })
+            });
+            if(err){
+                handleError(err)
+            }
         };
         
         switch (type) {
