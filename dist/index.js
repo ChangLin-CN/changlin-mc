@@ -495,7 +495,7 @@ var createApp = function createApp() {
                 var type = action.type;
 
                 if ((0, _changlinUtil.isString)(type)) {
-                    if (type.indexOf(namespace + separator) === 0) {
+                    if (type.indexOf(separator) > 0) {
                         return sagaEffects.put(action);
                     } else {
                         action.type = namespace + separator + type;

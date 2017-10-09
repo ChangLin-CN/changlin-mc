@@ -250,7 +250,7 @@ export let createApp = function (config = {}) {
                 
                 let {type} = action;
                 if (isString(type)) {
-                    if (type.indexOf(namespace + separator) === 0) {
+                    if (type.indexOf(separator)>0) {
                         return sagaEffects.put(action)
                     } else {
                         action.type = namespace + separator + type;
