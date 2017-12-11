@@ -9,7 +9,7 @@ import {warning} from 'changlin-warning'
 import {Provider} from 'react-redux'
 import createSagaMiddleware from 'redux-saga'
 import * as sagaEffects from 'redux-saga/effects'
-import {isArray, isFunction, isObject, isPlainObject, isString, isType} from 'changlin-util'
+import {isArray, isFunction, isObject, isPlainObject, isString, isType,isWindow} from 'changlin-util'
 
 
 let {takeEvery, takeLatest, throttle} = sagaEffects;
@@ -98,7 +98,7 @@ export let createApp = function (config = {}) {
         };
         
         if (process.env.NODE_ENV !== 'production') {
-            if (isObject(window) && isFunction(window.__REDUX_DEVTOOLS_EXTENSION__)) {
+            if (isWindow(window) && isFunction(window.__REDUX_DEVTOOLS_EXTENSION__)) {
                 devtools.push(window.__REDUX_DEVTOOLS_EXTENSION__())
             } else {
                 devtools.push(applyMiddleware(logger));

@@ -188,7 +188,7 @@ var createApp = function createApp() {
         };
 
         if (process.env.NODE_ENV !== 'production') {
-            if ((0, _changlinUtil.isObject)(window) && (0, _changlinUtil.isFunction)(window.__REDUX_DEVTOOLS_EXTENSION__)) {
+            if ((0, _changlinUtil.isWindow)(window) && (0, _changlinUtil.isFunction)(window.__REDUX_DEVTOOLS_EXTENSION__)) {
                 devtools.push(window.__REDUX_DEVTOOLS_EXTENSION__());
             } else {
                 devtools.push((0, _redux.applyMiddleware)(logger));
