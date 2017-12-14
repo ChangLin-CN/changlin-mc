@@ -1,24 +1,21 @@
 /*
-* 以React   React-router   redux   redux-saga为基础搭建一套框架
+* 以redux   redux-saga为基础搭建一套框架
 * */
 
-import React from 'react'
-import ReactDOM from 'react-dom'
 import {applyMiddleware, combineReducers, compose, createStore} from 'redux'
 import {warning} from 'changlin-warning'
-import {Provider} from 'react-redux'
 import createSagaMiddleware from 'redux-saga'
 import * as sagaEffects from 'redux-saga/effects'
 import {isArray, isFunction, isObject, isPlainObject, isString, isType,isWindow} from 'changlin-util'
 
 
-let {takeEvery, takeLatest, throttle} = sagaEffects;
+const {takeEvery, takeLatest, throttle} = sagaEffects;
 
 //namespace 保留字
 const reservedWord = ['router', 'loading'],
       separator    = '/';
 
-export let createApp = function (config = {}) {
+export const createApp = function (config = {}) {
     //app 的所有数据
     let app = {
         reducers: {
@@ -38,7 +35,6 @@ export let createApp = function (config = {}) {
     let {
             initialState   = {},
             onError        = () => void(0),
-            router         = <div/>,
             extraEnhancers = [],
         
         }   = config;
@@ -52,38 +48,12 @@ export let createApp = function (config = {}) {
         app.store     = createStore(
             reducer, initialState, compose(...enhancers)
         );
-        app.Router    = router;
-        
+        const {replaceReducer,...other} =app.store;
         return {
-            addModel,
-            setRouter,
-            start,
-            dispatch: app.store.dispatch,
-            getState: () => app.store.getState()
+            addModel,...other
         }
     }
-    
-    //启动app
-    function start(selector) {
-        let container;
-        let {Router, store} = app;
-        if (!warning(!isString(selector), 'selector should be string.')) {
-            try {
-                container = document.querySelector(selector);
-            } catch (e) {
-                warning(true, e)
-            }
-        }
-        
-        if (!container) return;
-        
-        ReactDOM.render(<Provider store={store}><Router addModel={addModel}/></Provider>, container)
-    }
-    
-    //设置路由
-    function setRouter(Router = <div/>) {
-        app.Router = Router
-    }
+
     
     //获取增强器
     function getEnhancers() {
