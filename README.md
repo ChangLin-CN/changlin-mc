@@ -3,6 +3,7 @@ redux + redux-saga
 
 [![npm version](https://img.shields.io/npm/v/changlin-mc.svg)](https://www.npmjs.com/package/changlin-mc)
 
+[![npm version](https://img.shields.io/npm/v/changlin-mc.svg)](https://www.npmjs.com/package/changlin-mc)
 ### v1.x 是含react 版本， 依赖包含：
         "babel-runtime": "^6.23.0",
         "changlin-util": "^2.2.4",

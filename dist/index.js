@@ -188,7 +188,7 @@ var createApp = function createApp() {
         };
 
         if (process.env.NODE_ENV !== 'production') {
-            if ((0, _changlinUtil.isObject)(window) && (0, _changlinUtil.isFunction)(window.__REDUX_DEVTOOLS_EXTENSION__)) {
+            if ((0, _changlinUtil.isWindow)(window) && (0, _changlinUtil.isFunction)(window.__REDUX_DEVTOOLS_EXTENSION__)) {
                 devtools.push(window.__REDUX_DEVTOOLS_EXTENSION__());
             } else {
                 devtools.push((0, _redux.applyMiddleware)(logger));
@@ -353,12 +353,14 @@ var createApp = function createApp() {
         }
 
         var wrapper = /*#__PURE__*/_regenerator2.default.mark(function wrapper(action) {
+            var err;
             return _regenerator2.default.wrap(function wrapper$(_context2) {
                 while (1) {
                     switch (_context2.prev = _context2.next) {
                         case 0:
-                            _context2.prev = 0;
-                            _context2.next = 3;
+                            err = void 0;
+                            _context2.prev = 1;
+                            _context2.next = 4;
                             return sagaEffects.put({
                                 type: 'loading',
                                 payload: {
@@ -366,22 +368,21 @@ var createApp = function createApp() {
                                 }
                             });
 
-                        case 3:
-                            _context2.next = 5;
+                        case 4:
+                            _context2.next = 6;
                             return fn(action, (0, _extends3.default)({}, sagaEffects, createSagaEffectsFnWrapper(namespace)));
 
-                        case 5:
-                            _context2.next = 10;
+                        case 6:
+                            _context2.next = 11;
                             break;
 
-                        case 7:
-                            _context2.prev = 7;
-                            _context2.t0 = _context2['catch'](0);
+                        case 8:
+                            _context2.prev = 8;
+                            _context2.t0 = _context2['catch'](1);
 
-                            handleError(_context2.t0);
+                            err = _context2.t0;
 
-                        case 10:
-                            _context2.prev = 10;
+                        case 11:
                             _context2.next = 13;
                             return sagaEffects.put({
                                 type: 'loading',
@@ -391,14 +392,16 @@ var createApp = function createApp() {
                             });
 
                         case 13:
-                            return _context2.finish(10);
+                            if (err) {
+                                handleError(err);
+                            }
 
                         case 14:
                         case 'end':
                             return _context2.stop();
                     }
                 }
-            }, wrapper, this, [[0, 7, 10, 14]]);
+            }, wrapper, this, [[1, 8]]);
         });
 
         switch (type) {
@@ -492,7 +495,7 @@ var createApp = function createApp() {
                 var type = action.type;
 
                 if ((0, _changlinUtil.isString)(type)) {
-                    if (type.indexOf(namespace + separator) === 0) {
+                    if (type.indexOf(separator) > 0) {
                         return sagaEffects.put(action);
                     } else {
                         action.type = namespace + separator + type;

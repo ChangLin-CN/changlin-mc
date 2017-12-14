@@ -1,6 +1,6 @@
 {
   "name": "changlin-mc",
-  "version": "1.0.0",
+  "version": "1.0.8",
   "description": "redux redux-saga",
   "main": "dist/index.js",
   "scripts": {
@@ -31,11 +31,18 @@
     "babel-register": "^6.26.0",
     "chai": "^4.1.1",
     "jsdoc-to-markdown": "^3.0.0",
-    "mocha": "^3.5.0"
+    "mocha": "^3.5.0",
+    "babel-eslint": "^8.0.3",
+    "eslint": "^4.13.1",
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1"
   },
   "dependencies": {
     "babel-runtime": "^6.23.0",
-    "changlin-util": "^2.2.4",
+    "changlin-util": "^2.2.5",
     "changlin-warning": "^1.0.0",
     "prop-types": "^15.5.10",
     "react": "^15.5.4",

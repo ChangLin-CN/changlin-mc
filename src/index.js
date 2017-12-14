@@ -9,7 +9,7 @@ import {warning} from 'changlin-warning'
 import {Provider} from 'react-redux'
 import createSagaMiddleware from 'redux-saga'
 import * as sagaEffects from 'redux-saga/effects'
-import {isArray, isFunction, isObject, isPlainObject, isString, isType} from 'changlin-util'
+import {isArray, isFunction, isObject, isPlainObject, isString, isType,isWindow} from 'changlin-util'
 
 
 let {takeEvery, takeLatest, throttle} = sagaEffects;
@@ -98,7 +98,7 @@ export let createApp = function (config = {}) {
         };
         
         if (process.env.NODE_ENV !== 'production') {
-            if (isObject(window) && isFunction(window.__REDUX_DEVTOOLS_EXTENSION__)) {
+            if (isWindow(window) && isFunction(window.__REDUX_DEVTOOLS_EXTENSION__)) {
                 devtools.push(window.__REDUX_DEVTOOLS_EXTENSION__())
             } else {
                 devtools.push(applyMiddleware(logger));
@@ -189,6 +189,7 @@ export let createApp = function (config = {}) {
         }
         
         let wrapper = function* (action) {
+            let err;
             try {
                 yield sagaEffects.put({
                     type: 'loading',
@@ -198,14 +199,16 @@ export let createApp = function (config = {}) {
                 });
                 yield fn(action, {...sagaEffects, ...createSagaEffectsFnWrapper(namespace)})
             } catch (e) {
-                handleError(e)
-            } finally {
-                yield   sagaEffects.put({
-                    type: 'loading',
-                    payload: {
-                        effects: {[namespace + separator + key]: false}
-                    }
-                })
+                err=e;
+            }
+            yield   sagaEffects.put({
+                type: 'loading',
+                payload: {
+                    effects: {[namespace + separator + key]: false}
+                }
+            });
+            if(err){
+                handleError(err)
             }
         };
         
@@ -247,7 +250,7 @@ export let createApp = function (config = {}) {
                 
                 let {type} = action;
                 if (isString(type)) {
-                    if (type.indexOf(namespace + separator) === 0) {
+                    if (type.indexOf(separator)>0) {
                         return sagaEffects.put(action)
                     } else {
                         action.type = namespace + separator + type;
