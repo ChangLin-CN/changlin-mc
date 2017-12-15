@@ -41,7 +41,7 @@ export  function createApp (config = {}) {
     init(app, _config);
 
     if(isArray(_config.model)){
-        _config.forEach(model=>{
+        _config.model.forEach(model=>{
             addModel(model)
         })
     }

@@ -94,4 +94,20 @@ describe('function test', function () {
 
 
 
+// describe('createApp with initialState ', function () {
+//     it('check state', function () {
+//         const app=createApp({
+//             initialState:{
+//                 [model1Namespace]:{
+//                     name:'jack'
+//                 }
+//             }
+//         })
+//
+//         expect(app.getState()[model1Namespace].name).to.be.equal('jack');
+//     });
+// });
+
+
+
 
