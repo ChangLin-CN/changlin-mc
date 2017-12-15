@@ -66,6 +66,24 @@ describe('function test', function () {
         expect(appDemo.getState()[model1Namespace].count).to.be.equal(9);
     });
 
+    it('check loadingState', function (done) {
+        expect(!appDemo.getState()['loading'].effects[model1Namespace+'/changeCount']).to.be.equal(true);
+        appDemo.dispatch({
+            type: model1Namespace + '/changeCount',
+            payload: {
+                count: 3
+            }
+        })
+        expect(appDemo.getState()['loading'].effects[model1Namespace+'/changeCount']).to.be.equal(true);
+        setTimeout(() => {
+            expect(appDemo.getState()[model1Namespace].count).to.be.equal(3);
+            expect(appDemo.getState()['loading'].effects[model1Namespace+'/changeCount']).to.be.equal(false);
+
+            done()
+        }, 101)
+    });
+
+
     it('onError', function () {
         appDemo.dispatch({
             type: model1Namespace + '/throwError',
