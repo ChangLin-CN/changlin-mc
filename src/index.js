@@ -36,10 +36,9 @@ export const createApp = function (config = {}) {
             initialState   = {},
             onError        = () => void(0),
             extraEnhancers = [],
-        
         }   = config;
     
-    return init(config);
+    return init();
     
     //一些方法
     function init() {
@@ -68,11 +67,16 @@ export const createApp = function (config = {}) {
         };
         
         if (process.env.NODE_ENV !== 'production') {
-            if (isWindow(window) && isFunction(window.__REDUX_DEVTOOLS_EXTENSION__)) {
-                devtools.push(window.__REDUX_DEVTOOLS_EXTENSION__())
-            } else {
-                devtools.push(applyMiddleware(logger));
+            try{
+                if (isWindow(window) && isFunction(window.__REDUX_DEVTOOLS_EXTENSION__)) {
+                    devtools.push(window.__REDUX_DEVTOOLS_EXTENSION__())
+                } else {
+                    devtools.push(applyMiddleware(logger));
+                }
+            }catch (e){
+                //Ignore the error: window is not defined
             }
+
         }
         //__REDUX_DEVTOOLS_EXTENSION__ 会改变sagamiddleware 里面的action,所以把它放后面去
         return [applyMiddleware(sagaMiddleware), ...extraEnhancers].concat(devtools)

@@ -3,7 +3,8 @@ module.exports = {
         "browser": true,
         "node": true,
         "commonjs": true,
-        "es6": true
+        "es6": true,
+        'mocha':true
     },
     globals:{
 
@@ -16,6 +17,6 @@ module.exports = {
     },
     "rules": {
         'no-unused-vars':0,
-        'no-console':0,
+        'no-console':0
     }
 }
