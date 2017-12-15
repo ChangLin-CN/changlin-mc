@@ -94,19 +94,22 @@ describe('function test', function () {
 
 
 
-// describe('createApp with initialState ', function () {
-//     it('check state', function () {
-//         const app=createApp({
-//             initialState:{
-//                 [model1Namespace]:{
-//                     name:'jack'
-//                 }
-//             }
-//         })
-//
-//         expect(app.getState()[model1Namespace].name).to.be.equal('jack');
-//     });
-// });
+describe('createApp with initialState and model ', function () {
+    it('check state', function () {
+        const app=createApp({
+            initialState:{
+                [model1Namespace]:{
+                    name:'jack'
+                }
+            },
+            model:[model1]
+        });
+
+        expect(app.getState()[model1Namespace].name).to.be.equal('jack');
+        expect(app.getState()[model1Namespace].count).to.be.equal(1);
+    });
+
+});
 
 
 

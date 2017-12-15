@@ -52,10 +52,12 @@ export  function createApp (config = {}) {
     };
 
     function addModel(model) {
-        _addModel(app, model)
+        _addModel(app,config, model)
     }
 }
 
+
+// helper
 
 /**
  *app init :createStore & rewrite handleError
@@ -63,11 +65,10 @@ export  function createApp (config = {}) {
  * @param config
  */
 function init(app, config) {
-    const {initialState} = config;
     let reducer = getReducer(app);
     let enhancers = getEnhancers(app, config);
     app.store = createStore(
-        reducer, initialState, compose(...enhancers)
+        reducer, compose(...enhancers)
     );
     app.handleError = function (desc) {
         const {onError} = config;
@@ -83,10 +84,11 @@ function init(app, config) {
  * add model to app
  *
  * @param app
+ * @param config
  * @param model
  * @private
  */
-function _addModel(app, model) {
+function _addModel(app, config,model) {
 
     if (warning(!isObject(model), 'model should be object')) return;
     const _model = extend(
@@ -107,8 +109,8 @@ function _addModel(app, model) {
     app.namespace.push(_model.namespace);
 
     //创建reducer并修改store
-    const _reducer = createReducer(_model);
-    app.reducers = Object.assign({}, app.reducers, {[_model.namespace]: _reducer});
+    const _reducer = createReducer(config,_model);
+    app.reducers = extend({}, app.reducers, {[_model.namespace]: _reducer});
     app.store.replaceReducer(getReducer(app));
 
     //创建saga
@@ -171,13 +173,13 @@ function getEnhancers(app, config) {
 
 /**
  * createReducer
+ * @param config
  * @param model
  * @returns {Function}
  */
-function createReducer(model) {
+function createReducer(config,model) {
     const {namespace, reducers} = model;
-    const initialState = model.state;
-
+    const initialState = extend(model.state,isObject(config.initialState) ? config.initialState[namespace]:{});
     return function (state = initialState, {type, ...other}) {
         let names = type.split(separator);
         if (names.length === 2 && namespace === names[0] && isFunction(reducers[names[1]])) {
