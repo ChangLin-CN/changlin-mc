@@ -1,12 +1,12 @@
 {
   "name": "changlin-mc",
-  "version": "1.0.8",
+  "version": "2.0.0",
   "description": "redux redux-saga",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha  --require babel-register test/test.js",
     "build:js": "babel src -d dist",
-    "pb": "npm run build:js && npm publish"
+    "pb": "npm run test && npm run build:js && npm publish"
   },
   "repository": {
     "type": "git",
