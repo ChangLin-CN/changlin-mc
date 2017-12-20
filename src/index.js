@@ -100,11 +100,11 @@ function _addModel(app, config,model) {
     );
 
     if (warning(!isString(_model.namespace), `namespace should be string but got ${typeof namespace}`)) return;
-    if (warning(reservedWord.indexOf(_model.namespace) > -1, `namespace should not be one of  '${reservedWord.join(' ')}'`)) return;
+    if (warning(reservedWord.indexOf(_model.namespace) > -1, `The namespace of model(${_model.namespace}) should not be one of  '${reservedWord.join(' ')}'`)) return;
     //避免重复添加model
-    if (warning(app.namespace.indexOf(_model.namespace) > -1, `namespace should not be one of  '${app.namespace.join(' ')}'`)) return;
-    if (warning(!isPlainObject(_model.reducers), 'reducers should be object')) return;
-    if (warning(!isPlainObject(_model.state), 'state should be object')) return;
+    if (warning(app.namespace.indexOf(_model.namespace) > -1, `The model(${_model.namespace}) is already in use`)) return;
+    if (warning(!isPlainObject(_model.reducers), `The reducers of model(${_model.namespace}) should be object`)) return;
+    if (warning(!isPlainObject(_model.state), `The state of model(${_model.namespace}) should be object`)) return;
 
     app.namespace.push(_model.namespace);
 
@@ -260,7 +260,7 @@ function createWatcher(namespace, key, effect, handleError) {
         fn = effect[0];
         type = effect[1].type || 'takeEvery';
         time = effect[1].time || 0;
-        if (warning(type === 'throttle' && (!isType('positiveNumber', time)), 'time is not number')) {
+        if (warning(type === 'throttle' && (!isType('positiveNumber', time)), `time is not number(${namespace} )`)) {
             time = 0
         }
     }
