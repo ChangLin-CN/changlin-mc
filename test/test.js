@@ -4,11 +4,13 @@ const expect = require('chai').expect;
 
 import {model1, namespace as model1Namespace} from "./model1";
 
-let err = null,errorCount=0;
+let err = null, errorCount = 0;
 
 
 const appDemo = createApp({
-    onError: error => {err = error,errorCount++}
+    onError: error => {
+        err = error, errorCount++
+    }
 });
 
 
@@ -67,17 +69,17 @@ describe('function test', function () {
     });
 
     it('check loadingState', function (done) {
-        expect(!appDemo.getState()['loading'].effects[model1Namespace+'/changeCount']).to.be.equal(true);
+        expect(!appDemo.getState()['loading'].effects[model1Namespace + '/changeCount']).to.be.equal(true);
         appDemo.dispatch({
             type: model1Namespace + '/changeCount',
             payload: {
                 count: 3
             }
         })
-        expect(appDemo.getState()['loading'].effects[model1Namespace+'/changeCount']).to.be.equal(true);
+        expect(appDemo.getState()['loading'].effects[model1Namespace + '/changeCount']).to.be.equal(true);
         setTimeout(() => {
             expect(appDemo.getState()[model1Namespace].count).to.be.equal(3);
-            expect(appDemo.getState()['loading'].effects[model1Namespace+'/changeCount']).to.be.equal(false);
+            expect(appDemo.getState()['loading'].effects[model1Namespace + '/changeCount']).to.be.equal(false);
 
             done()
         }, 101)
@@ -102,25 +104,24 @@ describe('function test', function () {
                 error: 'error2'
             }
         })
-        setTimeout(()=>{
+        setTimeout(() => {
             expect(err.message).to.be.equal('error2');
             done()
-        },101)
+        }, 101)
 
     });
 });
 
 
-
 describe('createApp with initialState and model ', function () {
     it('check state', function () {
-        const app=createApp({
-            initialState:{
-                [model1Namespace]:{
-                    name:'jack'
+        const app = createApp({
+            initialState: {
+                [model1Namespace]: {
+                    name: 'jack'
                 }
             },
-            model:[model1]
+            model: [model1]
         });
 
         expect(app.getState()[model1Namespace].name).to.be.equal('jack');
@@ -130,5 +131,50 @@ describe('createApp with initialState and model ', function () {
 });
 
 
+describe('createApp with the config "usedInVue:true" ', function () {
+    it('completed', function () {
+        const app = createApp({
+            model: [model1],
+            usedInVue: true,
+        });
+        const stateBefore = app.getState();
+        app.dispatch(
+            {
+                type: model1Namespace + '/updateState',
+                payload:{
+                    name:'newName'
+                }
+            }
+        );
+        const currentState=app.getState();
 
+        expect(stateBefore!==currentState).to.be.equal(false);
+        expect(currentState[model1Namespace].name).to.be.equal('newName');
+    });
+
+});
+
+describe('createApp with the config "usedInVue:false"(default false) ', function () {
+    it('completed', function () {
+        const app = createApp({
+            model: [model1]
+        });
+        const stateBefore = app.getState();
+        app.dispatch(
+            {
+                type: model1Namespace + '/updateState',
+                payload:{
+                    name:'newName'
+                }
+            }
+        );
+        const currentState=app.getState();
+
+        expect(stateBefore!==currentState).to.be.equal(true);
+        expect(currentState[model1Namespace].name).to.be.equal('newName');
+
+
+    });
+
+});
 

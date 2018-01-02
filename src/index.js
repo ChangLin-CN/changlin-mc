@@ -8,14 +8,24 @@ import {isArray, isFunction, isObject, isPlainObject, isString, isType, isWindow
 
 const {takeEvery, takeLatest, throttle} = sagaEffects;
 
+
 //namespace reserved word
 const reservedWord = ['router', 'loading'],
     separator = '/';
 
 export  function createApp (config = {}) {
-    let app = {
+    const _config = {
+        initialState: {},
+        onError: () => void(0),
+        extraEnhancers: [],
+        model:[],
+        usedInVue:false
+    };
+    if(isObject(config)){extend(_config, config)}
+
+    const app = {
         reducers: {
-            //集成loading
+            //integrate loading
             loading: (state = {effects: {}}, {type, payload}) => {
                 if (type === 'loading') {
                     let {effects, ...other} = payload;
@@ -27,15 +37,6 @@ export  function createApp (config = {}) {
         sagaMiddleware: createSagaMiddleware(),
         namespace: reservedWord.slice(0)
     };
-
-    let _config = {
-        initialState: {},
-        onError: () => void(0),
-        extraEnhancers: [],
-        model:[]
-    };
-
-    extend(_config, config);
 
 
     init(app, _config);
@@ -65,8 +66,8 @@ export  function createApp (config = {}) {
  * @param config
  */
 function init(app, config) {
-    let reducer = getReducer(app);
-    let enhancers = getEnhancers(app, config);
+    const reducer = getReducer(app),
+        enhancers = getEnhancers(app, config);
     app.store = createStore(
         reducer, compose(...enhancers)
     );
@@ -101,19 +102,19 @@ function _addModel(app, config,model) {
 
     if (warning(!isString(_model.namespace), `namespace should be string but got ${typeof namespace}`)) return;
     if (warning(reservedWord.indexOf(_model.namespace) > -1, `The namespace of model(${_model.namespace}) should not be one of  '${reservedWord.join(' ')}'`)) return;
-    //避免重复添加model
+    //Avoid duplicate additions
     if (warning(app.namespace.indexOf(_model.namespace) > -1, `The model(${_model.namespace}) is already in use`)) return;
     if (warning(!isPlainObject(_model.reducers), `The reducers of model(${_model.namespace}) should be object`)) return;
     if (warning(!isPlainObject(_model.state), `The state of model(${_model.namespace}) should be object`)) return;
 
     app.namespace.push(_model.namespace);
 
-    //创建reducer并修改store
+    //create reducer and replace reducer
     const _reducer = createReducer(config,_model);
     app.reducers = extend({}, app.reducers, {[_model.namespace]: _reducer});
     app.store.replaceReducer(getReducer(app));
 
-    //创建saga
+    //create saga
     if (isObject(_model.effects)) {
         app.sagaMiddleware.run(createSaga(app, _model))
     }
@@ -143,14 +144,14 @@ function getReducer(app) {
  * @returns {Array.<*>}
  */
 function getEnhancers(app, config) {
-    const {extraEnhancers} = config;
-    let {sagaMiddleware} = app;
-    let devtools = [];
+    const {extraEnhancers} = config,
+        {sagaMiddleware} = app,
+        devtools = [];
 
     const logger = store => next => action => {
-        console.log('dispatching', action);
-        let result = next(action);
-        console.log('next state', store.getState());
+        console.log('dispatching:', action);
+        const result = next(action);
+        console.log('next state:', store.getState());
         return result
     };
 
@@ -162,11 +163,11 @@ function getEnhancers(app, config) {
                 devtools.push(applyMiddleware(logger));
             }
         } catch (e) {
-            //Ignore the error: window is not defined
+            //Ignore the error: 'window is not defined'
         }
 
     }
-    //__REDUX_DEVTOOLS_EXTENSION__ 会改变sagamiddleware 里面的action,所以把它放后面去
+    //__REDUX_DEVTOOLS_EXTENSION__ will change the actions that created by sagamiddleware ,so i put it to the end
     return [applyMiddleware(sagaMiddleware), ...extraEnhancers].concat(devtools)
 }
 
@@ -181,11 +182,21 @@ function createReducer(config,model) {
     const {namespace, reducers} = model;
     const initialState = extend(model.state,isObject(config.initialState) ? config.initialState[namespace]:{});
     return function (state = initialState, {type, ...other}) {
-        let names = type.split(separator);
+        const names = type.split(separator);
+        let newState=state;
         if (names.length === 2 && namespace === names[0] && isFunction(reducers[names[1]])) {
-            state = reducers[names[1]](state, other)
+            newState = reducers[names[1]](state, other) || state
         }
-        return state
+
+        if(config.usedInVue){
+            return newState
+        }
+
+        if(newState!==state){
+            return newState
+        }
+
+        return {...newState}
     }
 }
 
@@ -217,7 +228,7 @@ function createSaga(app, model) {
 function prefixActionType(namespace) {
     function put(action) {
         if (isPlainObject(action)) {
-            //只有action.prefix === false 时不需要补充前缀
+            //no prefix only when action.prefix === false
             if (action.prefix === false) return sagaEffects.put(action)
 
             let {type} = action;
@@ -265,7 +276,7 @@ function createWatcher(namespace, key, effect, handleError) {
         }
     }
 
-    let wrapper = function* (action) {
+    const wrapper = function* (action) {
         let err;
         try {
             yield sagaEffects.put({

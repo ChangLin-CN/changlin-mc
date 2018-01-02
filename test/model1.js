@@ -39,9 +39,7 @@ export let model1={
     },
     reducers:{
         updateState(state,{payload}){
-            return {
-                ...state,...payload
-            }
+            Object.assign(state,payload);
         }
     }
 }

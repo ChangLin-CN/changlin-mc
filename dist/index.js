@@ -68,9 +68,22 @@ var reservedWord = ['router', 'loading'],
 function createApp() {
     var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
+    var _config = {
+        initialState: {},
+        onError: function onError() {
+            return void 0;
+        },
+        extraEnhancers: [],
+        model: [],
+        usedInVue: false
+    };
+    if ((0, _changlinUtil.isObject)(config)) {
+        (0, _changlinUtil.extend)(_config, config);
+    }
+
     var app = {
         reducers: {
-            //集成loading
+            //integrate loading
             loading: function loading() {
                 var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { effects: {} };
                 var _ref = arguments[1];
@@ -89,17 +102,6 @@ function createApp() {
         sagaMiddleware: (0, _reduxSaga2.default)(),
         namespace: reservedWord.slice(0)
     };
-
-    var _config = {
-        initialState: {},
-        onError: function onError() {
-            return void 0;
-        },
-        extraEnhancers: [],
-        model: []
-    };
-
-    (0, _changlinUtil.extend)(_config, config);
 
     init(app, _config);
 
@@ -129,8 +131,8 @@ function createApp() {
  * @param config
  */
 function init(app, config) {
-    var reducer = getReducer(app);
-    var enhancers = getEnhancers(app, config);
+    var reducer = getReducer(app),
+        enhancers = getEnhancers(app, config);
     app.store = (0, _redux.createStore)(reducer, _redux.compose.apply(undefined, (0, _toConsumableArray3.default)(enhancers)));
     app.handleError = function (desc) {
         var onError = config.onError;
@@ -161,19 +163,19 @@ function _addModel(app, config, model) {
 
     if ((0, _changlinWarning.warning)(!(0, _changlinUtil.isString)(_model.namespace), 'namespace should be string but got ' + (typeof namespace === 'undefined' ? 'undefined' : (0, _typeof3.default)(namespace)))) return;
     if ((0, _changlinWarning.warning)(reservedWord.indexOf(_model.namespace) > -1, 'The namespace of model(' + _model.namespace + ') should not be one of  \'' + reservedWord.join(' ') + '\'')) return;
-    //避免重复添加model
+    //Avoid duplicate additions
     if ((0, _changlinWarning.warning)(app.namespace.indexOf(_model.namespace) > -1, 'The model(' + _model.namespace + ') is already in use')) return;
     if ((0, _changlinWarning.warning)(!(0, _changlinUtil.isPlainObject)(_model.reducers), 'The reducers of model(' + _model.namespace + ') should be object')) return;
     if ((0, _changlinWarning.warning)(!(0, _changlinUtil.isPlainObject)(_model.state), 'The state of model(' + _model.namespace + ') should be object')) return;
 
     app.namespace.push(_model.namespace);
 
-    //创建reducer并修改store
+    //create reducer and replace reducer
     var _reducer = createReducer(config, _model);
     app.reducers = (0, _changlinUtil.extend)({}, app.reducers, (0, _defineProperty3.default)({}, _model.namespace, _reducer));
     app.store.replaceReducer(getReducer(app));
 
-    //创建saga
+    //create saga
     if ((0, _changlinUtil.isObject)(_model.effects)) {
         app.sagaMiddleware.run(createSaga(app, _model));
     }
@@ -202,17 +204,17 @@ function getReducer(app) {
  * @returns {Array.<*>}
  */
 function getEnhancers(app, config) {
-    var extraEnhancers = config.extraEnhancers;
-    var sagaMiddleware = app.sagaMiddleware;
+    var extraEnhancers = config.extraEnhancers,
+        sagaMiddleware = app.sagaMiddleware,
+        devtools = [];
 
-    var devtools = [];
 
     var logger = function logger(store) {
         return function (next) {
             return function (action) {
-                console.log('dispatching', action);
+                console.log('dispatching:', action);
                 var result = next(action);
-                console.log('next state', store.getState());
+                console.log('next state:', store.getState());
                 return result;
             };
         };
@@ -226,10 +228,10 @@ function getEnhancers(app, config) {
                 devtools.push((0, _redux.applyMiddleware)(logger));
             }
         } catch (e) {
-            //Ignore the error: window is not defined
+            //Ignore the error: 'window is not defined'
         }
     }
-    //__REDUX_DEVTOOLS_EXTENSION__ 会改变sagamiddleware 里面的action,所以把它放后面去
+    //__REDUX_DEVTOOLS_EXTENSION__ will change the actions that created by sagamiddleware ,so i put it to the end
     return [(0, _redux.applyMiddleware)(sagaMiddleware)].concat((0, _toConsumableArray3.default)(extraEnhancers)).concat(devtools);
 }
 
@@ -251,10 +253,20 @@ function createReducer(config, model) {
             other = (0, _objectWithoutProperties3.default)(_ref2, ['type']);
 
         var names = type.split(separator);
+        var newState = state;
         if (names.length === 2 && namespace === names[0] && (0, _changlinUtil.isFunction)(reducers[names[1]])) {
-            state = reducers[names[1]](state, other);
+            newState = reducers[names[1]](state, other) || state;
         }
-        return state;
+
+        if (config.usedInVue) {
+            return newState;
+        }
+
+        if (newState !== state) {
+            return newState;
+        }
+
+        return (0, _extends3.default)({}, newState);
     };
 }
 
@@ -354,7 +366,7 @@ function createSaga(app, model) {
 function prefixActionType(namespace) {
     function put(action) {
         if ((0, _changlinUtil.isPlainObject)(action)) {
-            //只有action.prefix === false 时不需要补充前缀
+            //no prefix only when action.prefix === false
             if (action.prefix === false) return sagaEffects.put(action);
 
             var type = action.type;
